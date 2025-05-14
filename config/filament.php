@@ -20,6 +20,11 @@ return [
     ],
 ],
 
+    'panels' => [
+    App\Providers\Filament\AdminPanelProvider::class,
+    App\Providers\Filament\UserPanelAdminProvider::class,  // Sesuaikan dengan nama kelas yang baru
+],
+
 
     'broadcasting' => [
 

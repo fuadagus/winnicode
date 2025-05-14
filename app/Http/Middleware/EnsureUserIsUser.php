@@ -6,13 +6,12 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class EnsureUserIsAdmin
+class EnsureUserIsUser
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (auth()->check() && auth()->user()->role !== 'admin') {
-            auth()->logout();
-            return redirect('/dashboard/login')->with('error', 'Anda tidak memiliki akses ke panel admin.');
+        if (auth()->check() && auth()->user()->role !== 'user') {
+            return redirect('/admin')->with('error', 'Hanya user biasa yang boleh mengakses panel ini.');
         }
 
         return $next($request);
