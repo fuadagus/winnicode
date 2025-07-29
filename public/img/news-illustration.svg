@@ -1,0 +1,44 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="400" height="300" fill="#f8fafc"/>
+  
+  <!-- Phone Device -->
+  <rect x="100" y="50" width="200" height="200" rx="20" fill="#ffffff" stroke="#e2e8f0" stroke-width="2"/>
+  <rect x="110" y="80" width="180" height="120" rx="8" fill="#3b82f6" opacity="0.1"/>
+  
+  <!-- Screen Content -->
+  <rect x="120" y="90" width="160" height="8" rx="4" fill="#3b82f6"/>
+  <rect x="120" y="105" width="120" height="6" rx="3" fill="#64748b"/>
+  <rect x="120" y="118" width="140" height="6" rx="3" fill="#64748b"/>
+  <rect x="120" y="131" width="100" height="6" rx="3" fill="#64748b"/>
+  
+  <!-- News Cards -->
+  <rect x="120" y="150" width="40" height="30" rx="4" fill="#e2e8f0"/>
+  <rect x="170" y="150" width="40" height="30" rx="4" fill="#e2e8f0"/>
+  <rect x="220" y="150" width="40" height="30" rx="4" fill="#e2e8f0"/>
+  
+  <!-- Icons -->
+  <circle cx="130" cy="165" r="4" fill="#3b82f6"/>
+  <circle cx="180" cy="165" r="4" fill="#10b981"/>
+  <circle cx="230" cy="165" r="4" fill="#f59e0b"/>
+  
+  <!-- Floating Elements -->
+  <circle cx="80" cy="100" r="15" fill="#fbbf24" opacity="0.8"/>
+  <rect x="320" y="120" width="25" height="25" rx="4" fill="#3b82f6" opacity="0.8"/>
+  <circle cx="350" cy="80" r="12" fill="#10b981" opacity="0.8"/>
+  
+  <!-- Notification Bell -->
+  <path d="M340 200 L345 195 L350 200 L345 205 Z" fill="#ef4444"/>
+  <circle cx="345" cy="195" r="8" fill="none" stroke="#ef4444" stroke-width="2"/>
+  
+  <!-- WiFi Signal -->
+  <path d="M60 180 C70 170, 90 170, 100 180" stroke="#3b82f6" stroke-width="3" fill="none"/>
+  <path d="M65 185 C72 178, 88 178, 95 185" stroke="#3b82f6" stroke-width="3" fill="none"/>
+  <circle cx="80" cy="190" r="2" fill="#3b82f6"/>
+  
+  <!-- Document Icon -->
+  <rect x="320" y="180" width="20" height="25" rx="2" fill="#ffffff" stroke="#64748b" stroke-width="1"/>
+  <rect x="323" y="185" width="14" height="2" fill="#64748b"/>
+  <rect x="323" y="190" width="10" height="2" fill="#64748b"/>
+  <rect x="323" y="195" width="12" height="2" fill="#64748b"/>
+</svg>
