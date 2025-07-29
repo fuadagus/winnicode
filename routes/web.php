@@ -13,6 +13,7 @@ use App\Http\Controllers\GalleryController;
 // All
 Route::get('/', [NewsController::class, 'index'])->name('home');
 Route::get('/gallery', [GalleryController::class, 'index'])->name('gallery.index');
+Route::get('/api/nearby-news', [NewsController::class, 'getNearbyNews'])->name('api.nearby-news');
 Route::get('/news/{news}/show', [NewsController::class, 'show'])->name('news.show');
 Route::post('/news/{news}/like', [LikeController::class, 'likeNews'])->name('news.like');
 Route::get('/news/{categories}/category', [NewsController::class, 'viewCategory'])->name('news.viewCategory');

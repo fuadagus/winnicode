@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Geolocation News</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .news-item { border: 1px solid #ddd; margin: 10px 0; padding: 15px; border-radius: 8px; }
+        .distance { background: #28a745; color: white; padding: 5px 10px; border-radius: 15px; font-size: 12px; }
+        .location-info { background: #f8f9fa; padding: 10px; border-radius: 5px; margin: 10px 0; }
+        button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <h1>Test Berita Terdekat</h1>
+    
+    <div class="location-info">
+        <p><strong>Status:</strong> <span id="status">Klik tombol untuk deteksi lokasi</span></p>
+        <p><strong>Koordinat:</strong> <span id="coordinates">-</span></p>
+    </div>
+    
+    <button onclick="getLocationAndNews()">Deteksi Lokasi & Cari Berita Terdekat</button>
+    
+    <div id="nearby-news"></div>
+
+    <script>
+        function getLocationAndNews() {
+            document.getElementById('status').innerText = 'Mendeteksi lokasi...';
+            
+            if (!navigator.geolocation) {
+                document.getElementById('status').innerText = 'Browser tidak mendukung geolocation';
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    
+                    document.getElementById('status').innerText = 'Lokasi ditemukan, mencari berita...';
+                    document.getElementById('coordinates').innerText = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+                    
+                    // Fetch nearby news
+                    fetch(`/api/nearby-news?lat=${lat}&lng=${lng}&radius=100&limit=10`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                displayNearbyNews(data.data);
+                                document.getElementById('status').innerText = `Ditemukan ${data.data.length} berita terdekat`;
+                            } else {
+                                document.getElementById('status').innerText = 'Tidak ada berita terdekat';
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            document.getElementById('status').innerText = 'Error: ' + error.message;
+                        });
+                },
+                function(error) {
+                    let errorMessage = 'Gagal mendapatkan lokasi: ';
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMessage += 'Izin ditolak';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMessage += 'Lokasi tidak tersedia';
+                            break;
+                        case error.TIMEOUT:
+                            errorMessage += 'Timeout';
+                            break;
+                    }
+                    document.getElementById('status').innerText = errorMessage;
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 15000,
+                    maximumAge: 0
+                }
+            );
+        }
+
+        function displayNearbyNews(newsArray) {
+            const container = document.getElementById('nearby-news');
+            
+            if (newsArray.length === 0) {
+                container.innerHTML = '<p>Tidak ada berita terdekat ditemukan.</p>';
+                return;
+            }
+            
+            let html = '<h2>Berita Terdekat</h2>';
+            
+            newsArray.forEach(news => {
+                html += `
+                    <div class="news-item">
+                        <h3>${news.title}</h3>
+                        <p>${news.excerpt}</p>
+                        <p><strong>Jarak:</strong> <span class="distance">${news.distance} km</span></p>
+                        <p><strong>Lokasi:</strong> ${news.location || 'Tidak diketahui'}</p>
+                        <p><strong>Penulis:</strong> ${news.author}</p>
+                        <p><strong>Kategori:</strong> ${news.category}</p>
+                        <p><strong>Tanggal:</strong> ${news.created_at}</p>
+                        <a href="${news.url}" target="_blank">Baca Selengkapnya</a>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+    </script>
+</body>
+</html>

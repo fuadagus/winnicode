@@ -47,11 +47,22 @@
                                          class="card-img-top featured-image" alt="" style="height: 400px; object-fit: cover;" />
                                     
                                     <!-- Local News Badge -->
-                                    <div v-if="news.distance && news.distance <= 100"
-                                         class="position-absolute bg-success text-white px-3 py-2 rounded-pill"
-                                         style="top: 20px; right: 20px; z-index: 10; font-size: 0.85rem;">
-                                        <i class="fa fa-map-marker me-1"></i> {{ news.distance.toFixed(1) }} km
-                                    </div>
+                                <!-- Distance Badge with different colors -->
+                                <div v-if="news.distance !== undefined && news.distance !== null" 
+                                     class="position-absolute text-white px-3 py-2 rounded-pill fw-bold"
+                                     :class="{
+                                         'bg-success': news.distance <= 10,
+                                         'bg-warning': news.distance > 10 && news.distance <= 50,
+                                         'bg-info': news.distance > 50 && news.distance <= 100,
+                                         'bg-secondary': news.distance > 100
+                                     }"
+                                     style="top: 20px; right: 20px; z-index: 10; font-size: 0.85rem; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
+                                    <i class="fa fa-map-marker me-1"></i>
+                                    <span v-if="news.distance <= 1">{{ (news.distance * 1000).toFixed(0) }}m</span>
+                                    <span v-else>{{ news.distance.toFixed(1) }}km</span>
+                                    <small v-if="news.distance <= 10" class="ms-1">TERDEKAT</small>
+                                    <small v-else-if="news.distance <= 50" class="ms-1">DEKAT</small>
+                                </div>
 
                                     <!-- Category Badge -->
                                     <div class="position-absolute"
@@ -163,6 +174,34 @@
                                     <button @click="getLocation" class="btn btn-success btn-sm w-100 rounded-pill">
                                         <i class="fa fa-location-arrow me-2"></i>Aktifkan Lokasi
                                     </button>
+                                    
+                                    <!-- Nearby News Results -->
+                                    <div v-if="nearbyNews.length > 0" class="mt-4">
+                                        <h6 class="fw-bold mb-3">
+                                            <i class="fa fa-star text-warning me-2"></i>Berita Terdekat
+                                        </h6>
+                                        <div v-for="news in nearbyNews.slice(0, 3)" :key="news.id" class="mb-3">
+                                            <div class="card border-0 bg-light">
+                                                <div class="card-body p-3">
+                                                    <h6 class="card-title small mb-2">
+                                                        <a :href="news.url" target="_blank" class="text-decoration-none text-dark">
+                                                            {{ news.title.length > 60 ? news.title.substring(0, 60) + '...' : news.title }}
+                                                        </a>
+                                                    </h6>
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <small class="text-muted">{{ news.author }}</small>
+                                                        <span class="badge bg-success rounded-pill small">
+                                                            <i class="fa fa-map-marker me-1"></i>{{ news.distance }} km
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <a v-if="nearbyNews.length > 3" href="/test-geolocation.html" target="_blank" 
+                                           class="btn btn-outline-success btn-sm w-100 rounded-pill">
+                                            Lihat Semua ({{ nearbyNews.length }})
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -180,17 +219,28 @@
                 </div>
                 
                 <div class="row g-4">
-                    <div v-for="news in latestNews.slice(0, 8)" :key="news.id" class="col-lg-3 col-md-6">
-                        <div class="card modern-card h-100 shadow-sm border-0 overflow-hidden hover-card">
+                    <div v-for="news in sortedLatestNews.slice(0, 8)" :key="news.id" class="col-lg-3 col-md-6">
+                        <div class="card modern-card h-100 shadow-sm border-0 overflow-hidden hover-card"
+                             :class="{ 'border-success border-2': news.distance !== undefined && news.distance <= 10 }">
                             <div class="position-relative">
                                 <img :src="news.image ? `/storage/images/${news.image}` : '/img/noimg.jpg'"
                                      class="card-img-top" alt="" style="height: 200px; object-fit: cover;" />
                                 
-                                <!-- Local News Badge -->
-                                <div v-if="news.distance && news.distance <= 100"
-                                     class="position-absolute bg-success text-white px-2 py-1 rounded-pill"
-                                     style="top: 10px; right: 10px; z-index: 10; font-size: 0.75rem;">
-                                    <i class="fa fa-map-marker me-1"></i>{{ news.distance.toFixed(1) }}km
+                                <!-- Distance Badge with different levels -->
+                                <div v-if="news.distance !== undefined && news.distance !== null" 
+                                     class="position-absolute text-white px-2 py-1 rounded-pill fw-bold"
+                                     :class="getDistanceBadgeClass(news.distance)"
+                                     style="top: 10px; right: 10px; z-index: 10; font-size: 0.7rem; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+                                    <i class="fa fa-map-marker me-1"></i>
+                                    <span v-if="news.distance <= 1">{{ (news.distance * 1000).toFixed(0) }}m</span>
+                                    <span v-else>{{ news.distance.toFixed(1) }}km</span>
+                                </div>
+
+                                <!-- Special "TERDEKAT" badge for very close news -->
+                                <div v-if="news.distance !== undefined && news.distance <= 5" 
+                                     class="position-absolute bg-danger text-white px-2 py-1 rounded-pill fw-bold"
+                                     style="top: 45px; right: 10px; z-index: 10; font-size: 0.6rem; animation: pulse 2s infinite;">
+                                    ⭐ TERDEKAT
                                 </div>
 
                                 <!-- Category Badge -->
@@ -273,6 +323,22 @@
                                         <div class="position-relative">
                                             <img :src="news.image ? `/storage/images/${news.image}` : '/img/noimg.jpg'"
                                                  class="card-img-top" alt="" style="height: 300px; object-fit: cover;" />
+                                            
+                                            <!-- Distance Badge for Featured Article -->
+                                            <div v-if="news.distance !== undefined && news.distance !== null" 
+                                                 class="position-absolute text-white px-3 py-2 rounded-pill fw-bold"
+                                                 :class="{
+                                                     'bg-success': news.distance <= 10,
+                                                     'bg-warning': news.distance > 10 && news.distance <= 50,
+                                                     'bg-info': news.distance > 50 && news.distance <= 100,
+                                                     'bg-secondary': news.distance > 100
+                                                 }"
+                                                 style="top: 15px; right: 15px; z-index: 10; font-size: 0.8rem; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
+                                                <i class="fa fa-location-arrow me-1"></i>
+                                                <span v-if="news.distance <= 1">{{ (news.distance * 1000).toFixed(0) }}m</span>
+                                                <span v-else>{{ news.distance.toFixed(1) }}km</span>
+                                            </div>
+                                            
                                             <div class="position-absolute top-0 start-0 end-0 bottom-0"
                                                  style="background: linear-gradient(transparent 60%, rgba(0,0,0,0.8));">
                                             </div>
@@ -370,6 +436,7 @@ const props = defineProps({
 const geolocationStatus = ref('')
 const geolocationError = ref(false)
 const userLocation = ref(null)
+const nearbyNews = ref([])
 
 // Computed properties for geolocation UI
 const geolocationAlertClass = computed(() => {
@@ -385,6 +452,31 @@ const geolocationIcon = computed(() => {
     if (geolocationStatus.value.includes('Meminta')) return 'fa-spinner fa-spin'
     return 'fa-info-circle'
 })
+
+// Computed property to sort news by distance (nearest first)
+const sortedLatestNews = computed(() => {
+    if (!userLocation.value) return props.latestNews
+    
+    return [...props.latestNews].sort((a, b) => {
+        // If both have distance, sort by distance
+        if (a.distance !== undefined && b.distance !== undefined) {
+            return a.distance - b.distance
+        }
+        // If only one has distance, prioritize it
+        if (a.distance !== undefined) return -1
+        if (b.distance !== undefined) return 1
+        // If neither has distance, maintain original order
+        return 0
+    })
+})
+
+// Helper function to get distance badge color class
+const getDistanceBadgeClass = (distance) => {
+    if (distance <= 10) return 'bg-success'
+    if (distance <= 50) return 'bg-warning'
+    if (distance <= 100) return 'bg-info'
+    return 'bg-secondary'
+}
 
 // Utility functions
 const formatDate = (dateString) => {
@@ -473,10 +565,34 @@ const updateNewsWithDistance = (userLat, userLng) => {
         geolocationError.value = false
     }
 
+    // Fetch nearby news from server
+    fetchNearbyNews(userLat, userLng)
+
     // Auto-hide after 5 seconds
     setTimeout(() => {
         geolocationStatus.value = ''
     }, 5000)
+}
+
+// Fetch nearby news from server API
+const fetchNearbyNews = async (latitude, longitude) => {
+    try {
+        console.log('Fetching nearby news for:', latitude, longitude)
+        const response = await fetch(`/api/nearby-news?lat=${latitude}&lng=${longitude}&radius=100&limit=10`)
+        const data = await response.json()
+        
+        if (data.success && data.data.length > 0) {
+            nearbyNews.value = data.data
+            console.log('Nearby news found:', nearbyNews.value.length)
+            geolocationStatus.value = `Ditemukan ${nearbyNews.value.length} berita terdekat dalam radius 100km`
+        } else {
+            nearbyNews.value = []
+            console.log('No nearby news found')
+        }
+    } catch (error) {
+        console.error('Error fetching nearby news:', error)
+        nearbyNews.value = []
+    }
 }
 
 const getLocation = () => {
@@ -805,6 +921,43 @@ onMounted(() => {
     .hover-card:hover {
         transform: none;
     }
+}
+
+/* Distance Badge Animations */
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(220, 38, 38, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(220, 38, 38, 0);
+    }
+}
+
+/* Enhanced badge styling */
+.card.border-success {
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.15) !important;
+}
+
+/* Distance badge glow effect */
+.position-absolute.bg-success {
+    box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.3), 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.position-absolute.bg-warning {
+    box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.3), 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.position-absolute.bg-info {
+    box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.3), 0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* Hover effects for news cards with distance */
+.card:has(.bg-success):hover {
+    transform: translateY(-8px) !important;
+    transition: transform 0.3s ease;
 }
 
 /* Custom Badges */
